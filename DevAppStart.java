@@ -1,3 +1,4 @@
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -6,12 +7,12 @@ import javax.swing.*;
 public class DevAppStart {
     static final String CONFIG_FILE = getConfigFilePath();
     public static void main(String[] args) {
-        JFrame frame = new JFrame("All Dev App Start");
+        JFrame frame = new JFrame("All Dev App Starter");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 500);
+        frame.setSize(750, 750);
         frame.setLayout(null);
-        JButton button = new JButton("Start");
-        button.setBounds(150, 200, 200, 50);
+        JButton startButton = new JButton("Start");
+        startButton.setBounds(225, 200, 200, 50);
         JCheckBox checkBoxes[] = {
 									new JCheckBox("Postman"),
 									new JCheckBox("Git-Bash"),
@@ -25,12 +26,22 @@ public class DevAppStart {
 									new JCheckBox("Spring-Tool-Suite-4")
         						};
         JPanel panel = new JPanel();
-        panel.setBounds(150, 250, 300, 300);
+        int panelHeight = checkBoxes.length * 20;
+        panel.setBounds(150, 250, 300,panelHeight);
         for (int i = 0; i < checkBoxes.length; i++) {
             panel.add(checkBoxes[i]);
         }
+        TextField textField1 = new TextField();
+        textField1.setBounds(150, 370, 300, 30);
+        TextField textField2 = new TextField();
+        textField2.setBounds(150, 410, 300, 30);
+        JButton addButton = new JButton("Add New App");
+        addButton.setBounds(150, 450, 150, 40);
+        frame.add(addButton);
+        frame.add(textField1);
+        frame.add(textField2);
         frame.add(panel);
-        frame.add(button);
+        frame.add(startButton);
         frame.setVisible(true);
         final String execPaths[] = {
 										"C:\\Users\\jashs\\AppData\\Local\\Postman\\Postman.exe",
@@ -46,7 +57,7 @@ public class DevAppStart {
         							};
 
         loadSelections(checkBoxes);
-        button.addActionListener(new ActionListener() {
+        startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -60,6 +71,16 @@ public class DevAppStart {
                     }
                 } catch (IOException exception) {
                     exception.printStackTrace();
+                }
+            }
+        });
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    //to write action logic
+                } catch(IOException excep) {
+                    excep.printStackTrace();
                 }
             }
         });
