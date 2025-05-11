@@ -1,8 +1,20 @@
+import java.awt.Checkbox;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 public class DevAppStart {
     static final String CONFIG_FILE = getConfigFilePath();
@@ -13,59 +25,32 @@ public class DevAppStart {
         frame.setLayout(null);
         JButton startButton = new JButton("Start");
         startButton.setBounds(225, 200, 200, 50);
-        JCheckBox checkBoxes[] = {
-									new JCheckBox("Postman"),
-									new JCheckBox("Git-Bash"),
-									new JCheckBox("Powershell"),
-									new JCheckBox("MongoDBCompass"),
-									new JCheckBox("Notion"),
-									new JCheckBox("Intellij-IDEA"),
-									new JCheckBox("Cursor"),
-									new JCheckBox("VS-Code"),
-									new JCheckBox("PG-Admin-4"),
-									new JCheckBox("Spring-Tool-Suite-4")
-        						};
+        List<JCheckBox> checkBoxes = new ArrayList<>();
         JPanel panel = new JPanel();
-        int panelHeight = checkBoxes.length * 20;
+        int panelHeight = checkBoxes.size() * 15;
         panel.setBounds(150, 250, 300,panelHeight);
-        for (int i = 0; i < checkBoxes.length; i++) {
-            panel.add(checkBoxes[i]);
-        }
-        TextField textField1 = new TextField();
-        textField1.setBounds(150, 370, 300, 30);
-        TextField textField2 = new TextField();
-        textField2.setBounds(150, 410, 300, 30);
+        int nextStart = 250+panelHeight;
+        TextField appPathField = new TextField();
+        nextStart+=10; //increase nextStart
+        appPathField.setBounds(150, nextStart, 300, 30); 
+        nextStart+=40;
+        TextField appNameField = new TextField();
+        appNameField.setBounds(150, nextStart, 300, 30);
+        nextStart+=40;
         JButton addButton = new JButton("Add New App");
-        addButton.setBounds(150, 450, 150, 40);
-        frame.add(addButton);
-        frame.add(textField1);
-        frame.add(textField2);
-        frame.add(panel);
-        frame.add(startButton);
-        frame.setVisible(true);
-        final String execPaths[] = {
-										"C:\\Users\\jashs\\AppData\\Local\\Postman\\Postman.exe",
-										"C:\\Program Files\\Git\\git-bash.exe",
-										"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-										"C:\\Users\\jashs\\AppData\\Local\\MongoDBCompass\\MongoDBCompass.exe",
-										"C:\\Users\\jashs\\AppData\\Local\\Programs\\Notion\\Notion.exe",
-										"C:\\Program Files\\JetBrains\\IntelliJ IDEA Community Edition 2024.3\\bin\\idea64.exe",
-										"C:\\Users\\jashs\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
-										"C:\\Users\\jashs\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
-										"C:\\Program Files\\PostgreSQL\\17\\pgAdmin 4\\runtime\\pgAdmin4.exe", 
-										"D:\\Downloads\\spring-tool-suite-4\\sts-4.28.0.RELEASE\\SpringToolSuite4.exe",
-        							};
+        addButton.setBounds(150, nextStart, 150, 40);
+        nextStart+=50; 
 
-        loadSelections(checkBoxes);
+        List<String> execPaths = new ArrayList<>();
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    saveSelections(checkBoxes);
-                    for (int i = 0; i < checkBoxes.length; i++) {
-                        if (checkBoxes[i].isSelected()) {
+                    //saveSelections(checkBoxes, execPaths);
+                    for (int i = 0; i < checkBoxes.size(); i++) {
+                        if (checkBoxes.get(i).isSelected()) {
                             //System.out.println(checkBoxes[i].getText());
-                            ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths[i]);
+                            ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
                             builder.start();
                         }
                     }
@@ -78,50 +63,54 @@ public class DevAppStart {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    //to write action logic
+                    // add checkbox(take the name from the nameField), add execPath(take path from pathField)
+                    
                 } catch(IOException excep) {
                     excep.printStackTrace();
                 }
             }
         });
+
+        for (int i = 0; i < checkBoxes.size(); i++) {
+            panel.add(checkBoxes.get(i));
+        }
+        frame.add(addButton);
+        frame.add(appPathField);
+        frame.add(appNameField);
+        frame.add(panel);
+        frame.add(startButton);
+        frame.setVisible(true);
     }
 
-    private static String getConfigFilePath() {
+    public static String getConfigFilePath() {
         String userHome = System.getProperty("user.home");
         File configDir = new File(userHome, ".devAppStart");
-        if (!configDir.exists()) {
+        if(!configDir.exists()) {
             configDir.mkdirs();
         }
         return new File(configDir, "config.txt").getAbsolutePath();
     }
 
-    private static void saveSelections(JCheckBox[] checkBoxes) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CONFIG_FILE))) {
-            for (int i = 0; i < checkBoxes.length; i++) {
-                writer.write(checkBoxes[i].isSelected() ? "true" : "false");
-                if (i != checkBoxes.length - 1) {
-                    writer.write(",");
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void loadSelections(JCheckBox[] checkBoxes) {
+    public void loadDetails(List<String> execPaths, List<JCheckBox> checkBoxes) {
         File file = new File(CONFIG_FILE);
-        if (file.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line = reader.readLine();
-                if (line != null) {
-                    String[] selections = line.split(",");
-                    for (int i = 0; i < selections.length && i < checkBoxes.length; i++) {
-                        checkBoxes[i].setSelected(Boolean.parseBoolean(selections[i]));
-                    }
+        if(file.exists()) {
+            try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while((line=reader.readLine())!=null) {
+                    // Line example :: App Name=ExecutablePath.exe, Selection(Boolean)
+                    String parts1[] = line.split("=");
+                    String appName = parts1[0]; //app name 
+                    String parts2[] = parts1[1].split(","); // execPath, selection
+                    String execPath = parts2[0]; //execPath
+                    String selection = parts2[1]; // selection
+                    execPaths.add(execPath);
+                    JCheckBox checkBox = new JCheckBox(appName);
+                    checkBox.setSelected(Boolean.parseBoolean(selection));
                 }
-            } catch (IOException e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
     }
+    
 }
