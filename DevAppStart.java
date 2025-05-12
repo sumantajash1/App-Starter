@@ -26,9 +26,11 @@ public class DevAppStart {
         JButton startButton = new JButton("Start");
         startButton.setBounds(225, 200, 200, 50);
         List<JCheckBox> checkBoxes = new ArrayList<>();
+        List<String> execPaths = new ArrayList<>();
+        loadDetails(execPaths, checkBoxes);
         JPanel panel = new JPanel();
-        int panelHeight = checkBoxes.size() * 15;
-        panel.setBounds(150, 250, 300,panelHeight);
+        int panelHeight = checkBoxes.size() * 30;
+        panel.setBounds(150, 250, 300, panelHeight);
         int nextStart = 250+panelHeight;
         TextField appPathField = new TextField();
         nextStart+=10; //increase nextStart
@@ -41,7 +43,6 @@ public class DevAppStart {
         addButton.setBounds(150, nextStart, 150, 40);
         nextStart+=50; 
 
-        List<String> execPaths = new ArrayList<>();
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -49,7 +50,6 @@ public class DevAppStart {
                     //saveSelections(checkBoxes, execPaths);
                     for (int i = 0; i < checkBoxes.size(); i++) {
                         if (checkBoxes.get(i).isSelected()) {
-                            //System.out.println(checkBoxes[i].getText());
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
                             builder.start();
                         }
@@ -64,8 +64,8 @@ public class DevAppStart {
             public void actionPerformed(ActionEvent e) {
                 try {
                     // add checkbox(take the name from the nameField), add execPath(take path from pathField)
-                    
-                } catch(IOException excep) {
+                    addNewApp(appNameField.getText(), appPathField.getText());
+                } catch(Exception excep) {
                     excep.printStackTrace();
                 }
             }
@@ -82,6 +82,7 @@ public class DevAppStart {
         frame.setVisible(true);
     }
 
+    // To get the configuration file path, if doesn't exist, it will automatically make one
     public static String getConfigFilePath() {
         String userHome = System.getProperty("user.home");
         File configDir = new File(userHome, ".devAppStart");
@@ -91,13 +92,32 @@ public class DevAppStart {
         return new File(configDir, "config.txt").getAbsolutePath();
     }
 
-    public void loadDetails(List<String> execPaths, List<JCheckBox> checkBoxes) {
+    // To add a new App
+    public static void addNewApp(String appName, String appExecPath) {
+        File file = new File(CONFIG_FILE);
+        if(file.exists()) {
+            try(BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+                writer.write(appName+"="+appExecPath+","+"false");
+                writer.newLine();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // For updating which apps were selected to be opened last time
+    public void updateSelection(List<JCheckBox> checkBoxes) { 
+
+    }
+
+    // To load all the details that are stored into the program
+    public static void loadDetails(List<String> execPaths, List<JCheckBox> checkBoxes) {
         File file = new File(CONFIG_FILE);
         if(file.exists()) {
             try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while((line=reader.readLine())!=null) {
-                    // Line example :: App Name=ExecutablePath.exe, Selection(Boolean)
+                // Line example :: App Name=ExecutablePath.exe, Selection(Boolean)
                     String parts1[] = line.split("=");
                     String appName = parts1[0]; //app name 
                     String parts2[] = parts1[1].split(","); // execPath, selection
@@ -106,6 +126,7 @@ public class DevAppStart {
                     execPaths.add(execPath);
                     JCheckBox checkBox = new JCheckBox(appName);
                     checkBox.setSelected(Boolean.parseBoolean(selection));
+                    checkBoxes.add(checkBox);
                 }
             } catch(Exception e) {
                 e.printStackTrace();
