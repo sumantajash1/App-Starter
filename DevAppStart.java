@@ -32,7 +32,7 @@ public class DevAppStart {
         panel.setBounds(150, 250, 500, panelHeight);
         int nextStart = 250+panelHeight;
         TextField appPathField = new TextField();
-        nextStart+=10; //increase nextStart
+        nextStart+=10; 
         appPathField.setBounds(150, nextStart, 300, 30); 
         nextStart+=40;
         TextField appNameField = new TextField();
