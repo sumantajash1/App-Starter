@@ -42,12 +42,12 @@ public class DevAppStart {
         JButton addButton = new JButton("Add New App");
         addButton.setBounds(150, nextStart, 150, 40);
         nextStart+=50; 
-
-        startButton.addActionListener(new ActionListener() {
+        
+        startButton.addActionListener(new ActionListener() { // Start Button
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    //saveSelections(checkBoxes, execPaths);
+                    updateSelection(checkBoxes);
                     for (int i = 0; i < checkBoxes.size(); i++) {
                         if (checkBoxes.get(i).isSelected()) {
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
@@ -59,11 +59,10 @@ public class DevAppStart {
                 }
             }
         });
-        addButton.addActionListener(new ActionListener() {
+        addButton.addActionListener(new ActionListener() { // Add new App button
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // add checkbox(take the name from the nameField), add execPath(take path from pathField)
                     addNewApp(appNameField.getText(), appPathField.getText());
                 } catch(Exception excep) {
                     excep.printStackTrace();
@@ -106,7 +105,32 @@ public class DevAppStart {
     }
 
     // For updating which apps were selected to be opened last time
-    public void updateSelection(List<JCheckBox> checkBoxes) { 
+    public static void updateSelection(List<JCheckBox> checkBoxes) { 
+        System.out.println("1. updateSelection method being called");
+        for(int i=0; i<checkBoxes.size(); i++) {
+            File file = new File(CONFIG_FILE);
+            if(file.exists()) System.out.println("2. file exists");
+            String appName = checkBoxes.get(i).getText();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))){
+                String line;
+                while((line= reader.readLine()) != null) {
+                    String[] parts1 = line.split("=");
+                    if(appName.equals(parts1[0]))  {
+                        System.out.println("3. app found" + parts1[0]);
+                        String[] parts2 = parts1[1].split(",");
+                        System.out.println(parts2[1]);
+                        if(checkBoxes.get(i).isSelected()) {
+                            parts2[1] = "true"; //use buffred writer
+                
+                        } else {
+                            parts2[1] = "false";
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         
     }
 
@@ -133,5 +157,4 @@ public class DevAppStart {
             }
         }
     }
-    
 }
