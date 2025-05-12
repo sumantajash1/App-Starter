@@ -1,4 +1,3 @@
-import java.awt.Checkbox;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,11 +42,11 @@ public class DevAppStart {
         addButton.setBounds(150, nextStart, 150, 40);
         nextStart+=50; 
         
-        startButton.addActionListener(new ActionListener() { // Start Button
+        startButton.addActionListener(new ActionListener() { 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    updateSelection(checkBoxes);
+                    updateSelection(checkBoxes, execPaths);
                     for (int i = 0; i < checkBoxes.size(); i++) {
                         if (checkBoxes.get(i).isSelected()) {
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
@@ -59,7 +58,8 @@ public class DevAppStart {
                 }
             }
         });
-        addButton.addActionListener(new ActionListener() { // Add new App button
+
+        addButton.addActionListener(new ActionListener() { 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -81,7 +81,6 @@ public class DevAppStart {
         frame.setVisible(true);
     }
 
-    // To get the configuration file path, if doesn't exist, it will automatically make one
     public static String getConfigFilePath() {
         String userHome = System.getProperty("user.home");
         File configDir = new File(userHome, ".devAppStart");
@@ -104,37 +103,21 @@ public class DevAppStart {
         }
     }
 
-    // For updating which apps were selected to be opened last time
-    public static void updateSelection(List<JCheckBox> checkBoxes) { 
-        System.out.println("1. updateSelection method being called");
-        for(int i=0; i<checkBoxes.size(); i++) {
-            File file = new File(CONFIG_FILE);
-            if(file.exists()) System.out.println("2. file exists");
-            String appName = checkBoxes.get(i).getText();
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))){
-                String line;
-                while((line= reader.readLine()) != null) {
-                    String[] parts1 = line.split("=");
-                    if(appName.equals(parts1[0]))  {
-                        System.out.println("3. app found" + parts1[0]);
-                        String[] parts2 = parts1[1].split(",");
-                        System.out.println(parts2[1]);
-                        if(checkBoxes.get(i).isSelected()) {
-                            parts2[1] = "true"; //use buffred writer
-                
-                        } else {
-                            parts2[1] = "false";
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    public static void updateSelection(List<JCheckBox> checkBoxes, List<String> execPaths) {
+        File file = new File(CONFIG_FILE);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for(int i=0; i<checkBoxes.size(); i++) {
+                String appName = checkBoxes.get(i).getText();
+                String execPath = execPaths.get(i);
+                String isSelected = checkBoxes.get(i).isSelected()?"true":"false";
+                writer.write(appName + "=" + execPath + "," + isSelected);
+                writer.newLine();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
     }
 
-    // To load all the details that are stored into the program
     public static void loadDetails(List<String> execPaths, List<JCheckBox> checkBoxes) {
         File file = new File(CONFIG_FILE);
         if(file.exists()) {
@@ -143,10 +126,10 @@ public class DevAppStart {
                 while((line=reader.readLine())!=null) {
                 // Line example :: App Name=ExecutablePath.exe, Selection(Boolean)
                     String parts1[] = line.split("=");
-                    String appName = parts1[0]; //app name 
-                    String parts2[] = parts1[1].split(","); // execPath, selection
-                    String execPath = parts2[0]; //execPath
-                    String selection = parts2[1]; // selection
+                    String appName = parts1[0];
+                    String parts2[] = parts1[1].split(","); 
+                    String execPath = parts2[0]; 
+                    String selection = parts2[1]; 
                     execPaths.add(execPath);
                     JCheckBox checkBox = new JCheckBox(appName);
                     checkBox.setSelected(Boolean.parseBoolean(selection));
