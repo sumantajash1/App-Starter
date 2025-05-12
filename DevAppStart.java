@@ -90,7 +90,6 @@ public class DevAppStart {
         return new File(configDir, "config.txt").getAbsolutePath();
     }
 
-    // To add a new App
     public static void addNewApp(String appName, String appExecPath) {
         File file = new File(CONFIG_FILE);
         if(file.exists()) {
