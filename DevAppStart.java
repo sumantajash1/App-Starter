@@ -29,8 +29,8 @@ public class DevAppStart {
         List<String> execPaths = new ArrayList<>();
         loadDetails(execPaths, checkBoxes);
         JPanel panel = new JPanel();
-        int panelHeight = checkBoxes.size() * 30;
-        panel.setBounds(150, 250, 300, panelHeight);
+        int panelHeight = checkBoxes.size() * 10;
+        panel.setBounds(150, 250, 500, panelHeight);
         int nextStart = 250+panelHeight;
         TextField appPathField = new TextField();
         nextStart+=10; //increase nextStart
@@ -107,7 +107,7 @@ public class DevAppStart {
 
     // For updating which apps were selected to be opened last time
     public void updateSelection(List<JCheckBox> checkBoxes) { 
-
+        
     }
 
     // To load all the details that are stored into the program
