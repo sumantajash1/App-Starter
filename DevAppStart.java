@@ -143,14 +143,14 @@ public class DevAppStart {
 
     public static Boolean isAppRunning(String execPath) {
         String exeName = new File(execPath).getName();
-        System.out.println(exeName);
+        //System.out.println(exeName);
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("tasklist");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while((line = reader.readLine()) != null) {
-                System.out.println(line.toLowerCase());
+                //System.out.println(line.toLowerCase());
                 if(line.toLowerCase().contains(exeName.toLowerCase())) {
                     return true;
                 }
