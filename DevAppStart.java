@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -48,7 +49,7 @@ public class DevAppStart {
                 try {
                     updateSelection(checkBoxes, execPaths);
                     for (int i = 0; i < checkBoxes.size(); i++) {
-                        if (checkBoxes.get(i).isSelected()) {
+                        if (checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i))) {
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
                             builder.start();
                         }
@@ -138,5 +139,25 @@ public class DevAppStart {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static Boolean isAppRunning(String execPath) {
+        String exeName = new File(execPath).getName();
+        System.out.println(exeName);
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("tasklist");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while((line = reader.readLine()) != null) {
+                System.out.println(line.toLowerCase());
+                if(line.toLowerCase().contains(exeName.toLowerCase())) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
