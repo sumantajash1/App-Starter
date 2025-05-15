@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,25 +33,52 @@ public class DevAppStart {
         int panelHeight = checkBoxes.size() * 10;
         panel.setBounds(150, 250, 500, panelHeight);
         int nextStart = 250+panelHeight;
+
+        JLabel pathLabel = new JLabel("App Executable Path:");
+        pathLabel.setBounds(150, nextStart, 150, 30);
+        frame.add(pathLabel);
+
+        nextStart += 30;
         TextField appPathField = new TextField();
-        nextStart+=10; 
-        appPathField.setBounds(150, nextStart, 300, 30); 
-        nextStart+=40;
+        appPathField.setBounds(150, nextStart, 300, 30);
+        frame.add(appPathField);
+
+        nextStart += 40;
+        JLabel nameLabel = new JLabel("App Name:");
+        nameLabel.setBounds(150, nextStart, 150, 30);
+        frame.add(nameLabel);
+
+        nextStart += 30;
         TextField appNameField = new TextField();
         appNameField.setBounds(150, nextStart, 300, 30);
-        nextStart+=40;
+        frame.add(appNameField);
+
+        nextStart += 40;
         JButton addButton = new JButton("Add New App");
         addButton.setBounds(150, nextStart, 150, 40);
-        nextStart+=50; 
-        
+        nextStart += 50;
+
+        JLabel statusLabel = new JLabel("");
+        statusLabel.setBounds(150, nextStart, 300, 30);
+        frame.add(statusLabel);
+
+        nextStart += 40;
+
         startButton.addActionListener(new ActionListener() { 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     updateSelection(checkBoxes, execPaths);
                     for (int i = 0; i < checkBoxes.size(); i++) {
-                        if (checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i))) {
+                        if(checkBoxes.get(i).isSelected()) {
+                            System.out.println(checkBoxes.get(i).getText() + "is selected"); //works
+                        }
+                        if(isAppRunning(execPaths.get(i))) {
+                            System.out.println(checkBoxes.get(i).getText() + "app is already running"); 
+                        }
+                        if ((checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i)))) {
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
+                            System.out.println(checkBoxes.get(i).getText() + "running ig"); 
                             builder.start();
                         }
                     }
@@ -64,9 +92,20 @@ public class DevAppStart {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    addNewApp(appNameField.getText(), appPathField.getText());
+                    String appName = appNameField.getText();
+                    String appExecPath = appPathField.getText();
+                    ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", appExecPath);
+                    builder.start();
+                    if(isAppRunning(appExecPath)) {
+                        addNewApp(appName, appExecPath);
+                        appNameField.setText("");
+                        appPathField.setText("");
+                        statusLabel.setText("App added successfully!");
+                    } else {
+                        statusLabel.setText("App doesn't exist / execution path is wrong.");
+                    }
                 } catch(Exception excep) {
-                    excep.printStackTrace();
+                    statusLabel.setText("App doesn't exist / execution path is wrong.");
                 }
             }
         });
@@ -75,8 +114,6 @@ public class DevAppStart {
             panel.add(checkBoxes.get(i));
         }
         frame.add(addButton);
-        frame.add(appPathField);
-        frame.add(appNameField);
         frame.add(panel);
         frame.add(startButton);
         frame.setVisible(true);
