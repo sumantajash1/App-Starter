@@ -1,3 +1,4 @@
+import java.awt.Checkbox;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +23,7 @@ public class DevAppStart {
     public static void main(String[] args) {
         JFrame frame = new JFrame("All Dev App Starter");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(750, 750);
+        frame.setSize(750, 850);
         frame.setLayout(null);
         JButton startButton = new JButton("Start");
         startButton.setBounds(225, 200, 200, 50);
@@ -33,36 +34,41 @@ public class DevAppStart {
         int panelHeight = checkBoxes.size() * 10;
         panel.setBounds(150, 250, 500, panelHeight);
         int nextStart = 250+panelHeight;
-
         JLabel pathLabel = new JLabel("App Executable Path:");
         pathLabel.setBounds(150, nextStart, 150, 30);
         frame.add(pathLabel);
-
         nextStart += 30;
         TextField appPathField = new TextField();
         appPathField.setBounds(150, nextStart, 300, 30);
         frame.add(appPathField);
-
         nextStart += 40;
         JLabel nameLabel = new JLabel("App Name:");
         nameLabel.setBounds(150, nextStart, 150, 30);
         frame.add(nameLabel);
-
         nextStart += 30;
         TextField appNameField = new TextField();
         appNameField.setBounds(150, nextStart, 300, 30);
         frame.add(appNameField);
-
         nextStart += 40;
         JButton addButton = new JButton("Add New App");
         addButton.setBounds(150, nextStart, 150, 40);
         nextStart += 50;
-
         JLabel statusLabel = new JLabel("");
         statusLabel.setBounds(150, nextStart, 300, 30);
         frame.add(statusLabel);
-
         nextStart += 40;
+        JLabel deleteLabel = new JLabel("Name of the app you want to delete (As per the checkboxes)");
+        deleteLabel.setBounds(150, nextStart, 350, 30);
+        frame.add(deleteLabel);
+        nextStart += 30;
+        TextField deleteAppField = new TextField();
+        deleteAppField.setBounds(150, nextStart, 300, 30);
+        frame.add(deleteAppField);
+        nextStart += 40;
+        JButton deleteButton = new JButton("Delete an App");
+        deleteButton.setBounds(150, nextStart, 150, 40);
+        frame.add(deleteButton);
+        nextStart += 50;
 
         startButton.addActionListener(new ActionListener() { 
             @Override
@@ -107,6 +113,14 @@ public class DevAppStart {
                 } catch(Exception excep) {
                     statusLabel.setText("App doesn't exist / execution path is wrong.");
                 }
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                deleteApp(deleteAppField.getText(), checkBoxes, execPaths);
+                deleteAppField.setText("");
             }
         });
 
@@ -196,5 +210,20 @@ public class DevAppStart {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static void deleteApp(String appName, List<JCheckBox> checkboxes, List<String> execPaths) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(CONFIG_FILE)))) {
+            for(int i=0; i<checkboxes.size(); i++) {
+                if(checkboxes.get(i).getText().toLowerCase().equals(appName.toLowerCase())) {
+                    continue;
+                }
+                String isSelected = checkboxes.get(i).isSelected()?"true":"false";
+                writer.write(checkboxes.get(i).getText()+"="+execPaths.get(i)+","+isSelected);
+                writer.newLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
