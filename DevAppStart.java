@@ -6,7 +6,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -101,6 +100,7 @@ public class DevAppStart {
                         appNameField.setText("");
                         appPathField.setText("");
                         statusLabel.setText("App added successfully!");
+                        restartApp();
                     } else {
                         statusLabel.setText("App doesn't exist / execution path is wrong.");
                     }
@@ -132,8 +132,8 @@ public class DevAppStart {
         File file = new File(CONFIG_FILE);
         if(file.exists()) {
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                writer.write(appName+"="+appExecPath+","+"false");
-                writer.newLine();
+                writer.write(appName+"="+appExecPath+",false");   
+                writer.newLine();   
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -196,5 +196,16 @@ public class DevAppStart {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static void restartApp() {
+        try {
+            String thisAppPath = "C:\\Users\\jashs\\OneDrive\\Desktop\\Java Projects\\All Dev App Starter\\AppStarter.jar";
+            ProcessBuilder builder = new ProcessBuilder("java", "-jar", thisAppPath);
+            builder.start();
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
