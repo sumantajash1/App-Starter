@@ -1,4 +1,3 @@
-import java.awt.Checkbox;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -99,16 +98,20 @@ public class DevAppStart {
                 try {
                     String appName = appNameField.getText();
                     String appExecPath = appPathField.getText();
-                    ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", appExecPath);
-                    builder.start();
-                    if(isAppRunning(appExecPath)) {
-                        addNewApp(appName, appExecPath);
-                        appNameField.setText("");
-                        appPathField.setText("");
-                        statusLabel.setText("App added successfully!");
-                        restartApp();
+                    if(alreadyExists(appExecPath)) {
+                        statusLabel.setText("App already Exists");
                     } else {
-                        statusLabel.setText("App doesn't exist / execution path is wrong.");
+                        ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", appExecPath);
+                        builder.start();
+                        if(isAppRunning(appExecPath)) {
+                            addNewApp(appName, appExecPath);
+                            appNameField.setText("");
+                            appPathField.setText("");
+                            statusLabel.setText("App added successfully!");
+                            restartApp();
+                        } else {
+                            statusLabel.setText("App doesn't exist / execution path is wrong.");
+                        }
                     }
                 } catch(Exception excep) {
                     statusLabel.setText("App doesn't exist / execution path is wrong.");
@@ -221,6 +224,24 @@ public class DevAppStart {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Boolean alreadyExists(String appExecPath) {
+        System.out.println("alreadyExists function called");
+        try (BufferedReader reader = new BufferedReader(new FileReader(new File(CONFIG_FILE)))) {
+            String line;
+            while((line = reader.readLine()) != null) {
+                String[] split1 = line.split("=");
+                String[] split2 = split1[1].split(",");
+                System.out.println(split2[0]);
+                if(appExecPath.toLowerCase().equals(split2[0].toLowerCase())) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static void deleteApp(String appName, List<JCheckBox> checkboxes, List<String> execPaths) {
