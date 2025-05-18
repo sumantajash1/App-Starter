@@ -98,7 +98,11 @@ public class DevAppStart {
                 try {
                     String appName = appNameField.getText();
                     String appExecPath = appPathField.getText();
-                    if(alreadyExists(appExecPath)) {
+                    if(appName.isEmpty() || appExecPath.isEmpty()) {
+                        statusLabel.setText("app name &/ executable path cannot be empty");
+                        return;
+                    }
+                    if(doesExist(appExecPath)) {
                         statusLabel.setText("App already Exists");
                     } else {
                         ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", appExecPath);
@@ -122,8 +126,13 @@ public class DevAppStart {
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                deleteApp(deleteAppField.getText(), checkBoxes, execPaths);
-                deleteAppField.setText("");
+                if(deleteApp(deleteAppField.getText(), checkBoxes, execPaths)) {
+                    deleteLabel.setText("App deleted Successfully");
+                    deleteAppField.setText("");
+                    restartApp();
+                } else {
+                    deleteLabel.setText("Please enter a valid app name");
+                }  
             }
         });
 
@@ -226,14 +235,12 @@ public class DevAppStart {
         }
     }
 
-    public static Boolean alreadyExists(String appExecPath) {
-        System.out.println("alreadyExists function called");
+    public static Boolean doesExist(String appExecPath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(CONFIG_FILE)))) {
             String line;
             while((line = reader.readLine()) != null) {
                 String[] split1 = line.split("=");
                 String[] split2 = split1[1].split(",");
-                System.out.println(split2[0]);
                 if(appExecPath.toLowerCase().equals(split2[0].toLowerCase())) {
                     return true;
                 }
@@ -244,10 +251,12 @@ public class DevAppStart {
         return false;
     }
 
-    public static void deleteApp(String appName, List<JCheckBox> checkboxes, List<String> execPaths) {
+    public static Boolean deleteApp(String appName, List<JCheckBox> checkboxes, List<String> execPaths) {
+        Boolean isFound = false;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(CONFIG_FILE)))) {
             for(int i=0; i<checkboxes.size(); i++) {
                 if(checkboxes.get(i).getText().toLowerCase().equals(appName.toLowerCase())) {
+                    isFound = true;
                     continue;
                 }
                 String isSelected = checkboxes.get(i).isSelected()?"true":"false";
@@ -257,5 +266,6 @@ public class DevAppStart {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return isFound;
     }
 }
