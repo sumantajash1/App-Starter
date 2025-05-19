@@ -79,7 +79,6 @@ public class DevAppStart {
                     for (int i = 0; i < checkBoxes.size(); i++) {
                         if ((checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i)))) {
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
-                            //System.out.println(checkBoxes.get(i).getText() + "running ig"); 
                             builder.start();
                         }
                     }
@@ -191,7 +190,6 @@ public class DevAppStart {
             try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while((line=reader.readLine())!=null) {
-                // Line example :: App Name=ExecutablePath.exe, Selection(Boolean)
                     String parts1[] = line.split("=");
                     String appName = parts1[0];
                     String parts2[] = parts1[1].split(","); 
@@ -210,14 +208,12 @@ public class DevAppStart {
 
     public static Boolean isAppRunning(String execPath) {
         String exeName = new File(execPath).getName();
-        //System.out.println(exeName);
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("tasklist");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while((line = reader.readLine()) != null) {
-                //System.out.println(line.toLowerCase());
                 if(line.toLowerCase().contains(exeName.toLowerCase())) {
                     return true;
                 }
@@ -288,17 +284,13 @@ public class DevAppStart {
                 for (String taskLine : taskListLines) {
                     if (taskLine.contains(name)) {
                         if(name.equals("powershell.exe")) {
-                            continue;
-                            // ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", "WindowsTerminal.exe");
-                            // killBuilder.start();
-                            // System.out.println("Killing: WindowsTerminal.exe");
+                            ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", "WindowsTerminal.exe");
+                            killBuilder.start();
                         } 
                         if(name.equals("git-bash.exe")) {
                             ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", "mintty.exe");
                             killBuilder.start();
-                            System.out.println("Killing: mintty.exe");
                         }
-                        System.out.println("Killing: " + name);
                         ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", name);
                         killBuilder.start();
                         break;
