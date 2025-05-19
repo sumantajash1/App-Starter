@@ -1,147 +1,202 @@
-import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 
 public class DevAppStart {
     static final String CONFIG_FILE = getConfigFilePath();
+
     public static void main(String[] args) {
         JFrame frame = new JFrame("All Dev App Starter");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(750, 850);
-        frame.setLayout(null);
-        JButton startButton = new JButton("Start");
-        startButton.setBounds(225, 200, 200, 50);
+        frame.setSize(600, 700);
+        frame.setLocationRelativeTo(null);
+
+        // Main panel with padding
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBorder(new EmptyBorder(20, 30, 20, 30));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        frame.setContentPane(mainPanel);
+
+        // Title
+        JLabel titleLabel = new JLabel("All Dev App Starter");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(titleLabel);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // Section: App List
+        JLabel listLabel = new JLabel("Select apps to launch:");
+        listLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        listLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(listLabel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
         List<JCheckBox> checkBoxes = new ArrayList<>();
         List<String> execPaths = new ArrayList<>();
         loadDetails(execPaths, checkBoxes);
-        JPanel panel = new JPanel();
-        int panelHeight = checkBoxes.size() * 10;
-        panel.setBounds(150, 250, 500, panelHeight);
-        int nextStart = 250+panelHeight;
+
+        JPanel appListPanel = new JPanel();
+        appListPanel.setLayout(new BoxLayout(appListPanel, BoxLayout.Y_AXIS));
+        appListPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        for (JCheckBox cb : checkBoxes) {
+            cb.setFont(new Font("Arial", Font.PLAIN, 14));
+            appListPanel.add(cb);
+        }
+        JScrollPane scrollPane = new JScrollPane(appListPanel);
+        scrollPane.setPreferredSize(new Dimension(500, 150));
+        mainPanel.add(scrollPane);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // Section: Add New App
+        JLabel addLabel = new JLabel("Add a New App");
+        addLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        addLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(addLabel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        JPanel addPanel = new JPanel(new GridBagLayout());
+        addPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
         JLabel pathLabel = new JLabel("App Executable Path:");
-        pathLabel.setBounds(150, nextStart, 150, 30);
-        frame.add(pathLabel);
-        nextStart += 30;
-        TextField appPathField = new TextField();
-        appPathField.setBounds(150, nextStart, 300, 30);
-        frame.add(appPathField);
-        nextStart += 40;
+        JTextField appPathField = new JTextField(25);
         JLabel nameLabel = new JLabel("App Name:");
-        nameLabel.setBounds(150, nextStart, 150, 30);
-        frame.add(nameLabel);
-        nextStart += 30;
-        TextField appNameField = new TextField();
-        appNameField.setBounds(150, nextStart, 300, 30);
-        frame.add(appNameField);
-        nextStart += 40;
+        JTextField appNameField = new JTextField(25);
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        addPanel.add(pathLabel, gbc);
+        gbc.gridx = 1;
+        addPanel.add(appPathField, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        addPanel.add(nameLabel, gbc);
+        gbc.gridx = 1;
+        addPanel.add(appNameField, gbc);
+
         JButton addButton = new JButton("Add New App");
-        addButton.setBounds(150, nextStart, 150, 40);
-        nextStart += 50;
-        JLabel statusLabel = new JLabel("");
-        statusLabel.setBounds(150, nextStart, 300, 30);
-        frame.add(statusLabel);
-        nextStart += 40;
-        JLabel deleteLabel = new JLabel("Name of the app you want to delete (As per the checkboxes)");
-        deleteLabel.setBounds(150, nextStart, 350, 30);
-        frame.add(deleteLabel);
-        nextStart += 30;
-        TextField deleteAppField = new TextField();
-        deleteAppField.setBounds(150, nextStart, 300, 30);
-        frame.add(deleteAppField);
-        nextStart += 40;
+        addButton.setFont(new Font("Arial", Font.BOLD, 14));
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        addPanel.add(addButton, gbc);
+
+        mainPanel.add(addPanel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        JLabel statusLabel = new JLabel(" ");
+        statusLabel.setFont(new Font("Arial", Font.ITALIC, 13));
+        statusLabel.setForeground(new Color(0, 102, 0));
+        statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(statusLabel);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // Section: Delete App
+        JLabel deleteLabel = new JLabel("Delete an App");
+        deleteLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        deleteLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(deleteLabel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        JPanel deletePanel = new JPanel(new GridBagLayout());
+        deletePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        JLabel deleteAppLabel = new JLabel("Name of the app you want to delete:");
+        JTextField deleteAppField = new JTextField(20);
         JButton deleteButton = new JButton("Delete an App");
-        deleteButton.setBounds(150, nextStart, 150, 40);
-        frame.add(deleteButton);
-        nextStart += 50;
+        deleteButton.setFont(new Font("Arial", Font.BOLD, 14));
 
-        startButton.addActionListener(new ActionListener() { 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    updateSelection(checkBoxes, execPaths);
-                    for (int i = 0; i < checkBoxes.size(); i++) {
-                        if(checkBoxes.get(i).isSelected()) {
-                            System.out.println(checkBoxes.get(i).getText() + "is selected"); //works
-                        }
-                        if(isAppRunning(execPaths.get(i))) {
-                            System.out.println(checkBoxes.get(i).getText() + "app is already running"); 
-                        }
-                        if ((checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i)))) {
-                            ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
-                            System.out.println(checkBoxes.get(i).getText() + "running ig"); 
-                            builder.start();
-                        }
-                    }
-                } catch (IOException exception) {
-                    exception.printStackTrace();
-                }
-            }
-        });
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
+        deletePanel.add(deleteAppLabel, gbc);
+        gbc.gridx = 1;
+        deletePanel.add(deleteAppField, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
+        deletePanel.add(deleteButton, gbc);
 
-        addButton.addActionListener(new ActionListener() { 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String appName = appNameField.getText();
-                    String appExecPath = appPathField.getText();
-                    if(appName.isEmpty() || appExecPath.isEmpty()) {
-                        statusLabel.setText("app name &/ executable path cannot be empty");
-                        return;
-                    }
-                    if(doesExist(appExecPath)) {
-                        statusLabel.setText("App already Exists");
-                    } else {
-                        ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", appExecPath);
+        mainPanel.add(deletePanel);
+        mainPanel.add(Box.createVerticalStrut(20));
+
+        // Start Button
+        JButton startButton = new JButton("Start Selected Apps");
+        startButton.setFont(new Font("Arial", Font.BOLD, 18));
+        startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(startButton);
+
+        // --- Action Listeners ---
+        startButton.addActionListener(e -> {
+            try {
+                updateSelection(checkBoxes, execPaths);
+                for (int i = 0; i < checkBoxes.size(); i++) {
+                    if (checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i))) {
+                        ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
                         builder.start();
-                        if(isAppRunning(appExecPath)) {
-                            addNewApp(appName, appExecPath);
-                            appNameField.setText("");
-                            appPathField.setText("");
-                            statusLabel.setText("App added successfully!");
-                            restartApp();
-                        } else {
-                            statusLabel.setText("App doesn't exist / execution path is wrong.");
-                        }
                     }
-                } catch(Exception excep) {
-                    statusLabel.setText("App doesn't exist / execution path is wrong.");
                 }
+                statusLabel.setText("Selected apps started (if not already running).");
+            } catch (IOException exception) {
+                statusLabel.setText("Error starting apps.");
             }
         });
 
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if(deleteApp(deleteAppField.getText(), checkBoxes, execPaths)) {
-                    deleteLabel.setText("App deleted Successfully");
-                    deleteAppField.setText("");
+        addButton.addActionListener(e -> {
+            String appName = appNameField.getText().trim();
+            String appExecPath = appPathField.getText().trim();
+            if (appName.isEmpty() || appExecPath.isEmpty()) {
+                statusLabel.setText("App name & executable path cannot be empty.");
+                return;
+            }
+            for (JCheckBox cb : checkBoxes) {
+                if (cb.getText().equalsIgnoreCase(appName)) {
+                    statusLabel.setText("App name already exists.");
+                    return;
+                }
+            }
+            if (doesExist(appExecPath)) {
+                statusLabel.setText("App path already exists.");
+                return;
+            }
+            try {
+                ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", appExecPath);
+                builder.start();
+                if (isAppRunning(appExecPath)) {
+                    addNewApp(appName, appExecPath);
+                    appNameField.setText("");
+                    appPathField.setText("");
+                    statusLabel.setText("App added successfully! Restarting...");
                     restartApp();
                 } else {
-                    deleteLabel.setText("Please enter a valid app name");
-                }  
+                    statusLabel.setText("App doesn't exist / execution path is wrong.");
+                }
+            } catch (Exception excep) {
+                statusLabel.setText("App doesn't exist / execution path is wrong.");
             }
         });
 
-        for (int i = 0; i < checkBoxes.size(); i++) {
-            panel.add(checkBoxes.get(i));
-        }
-        frame.add(addButton);
-        frame.add(panel);
-        frame.add(startButton);
+        deleteButton.addActionListener(e -> {
+            String appNameToDelete = deleteAppField.getText().trim();
+            if (appNameToDelete.isEmpty()) {
+                statusLabel.setText("Please enter an app name to delete.");
+                return;
+            }
+            if (deleteApp(appNameToDelete, checkBoxes, execPaths)) {
+                deleteAppField.setText("");
+                statusLabel.setText("App deleted. Restarting...");
+                restartApp();
+            } else {
+                statusLabel.setText("App not found.");
+            }
+        });
+
         frame.setVisible(true);
     }
 
