@@ -67,6 +67,9 @@ public class DevAppStart {
         deleteButton.setBounds(150, nextStart, 150, 40);
         frame.add(deleteButton);
         nextStart += 50;
+        JButton closeAllButton = new JButton("Close all Running Applications");
+        closeAllButton.setBounds(150, nextStart, 300, 40);
+        frame.add(closeAllButton);
 
         startButton.addActionListener(new ActionListener() { 
             @Override
@@ -133,6 +136,13 @@ public class DevAppStart {
                 } else {
                     deleteLabel.setText("Please enter a valid app name");
                 }  
+            }
+        });
+
+        closeAllButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                closeAlltheApps(execPaths);
             }
         });
 
@@ -267,5 +277,31 @@ public class DevAppStart {
             e.printStackTrace();
         }
         return isFound;
+    }
+
+    public static void closeAlltheApps(List<String> appExecPaths) {
+        try {
+            ProcessBuilder builder = new ProcessBuilder("tasklist");
+            Process process = builder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            List<String> taskListLines = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                taskListLines.add(line.toLowerCase());
+            }
+            for (String execPath : appExecPaths) {
+                String name = new File(execPath).getName().toLowerCase();
+                for (String taskLine : taskListLines) {
+                    if (taskLine.contains(name)) {
+                        System.out.println("Killing: " + name);
+                        ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", name);
+                        killBuilder.start();
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
