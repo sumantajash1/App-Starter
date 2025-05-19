@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.PortUnreachableException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -77,15 +78,9 @@ public class DevAppStart {
                 try {
                     updateSelection(checkBoxes, execPaths);
                     for (int i = 0; i < checkBoxes.size(); i++) {
-                        if(checkBoxes.get(i).isSelected()) {
-                            System.out.println(checkBoxes.get(i).getText() + "is selected"); //works
-                        }
-                        if(isAppRunning(execPaths.get(i))) {
-                            System.out.println(checkBoxes.get(i).getText() + "app is already running"); 
-                        }
                         if ((checkBoxes.get(i).isSelected() && !isAppRunning(execPaths.get(i)))) {
                             ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "start", "", execPaths.get(i));
-                            System.out.println(checkBoxes.get(i).getText() + "running ig"); 
+                            //System.out.println(checkBoxes.get(i).getText() + "running ig"); 
                             builder.start();
                         }
                     }
@@ -142,7 +137,7 @@ public class DevAppStart {
         closeAllButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                closeAlltheApps(execPaths);
+                closeAllApps(execPaths);
             }
         });
 
@@ -279,7 +274,7 @@ public class DevAppStart {
         return isFound;
     }
 
-    public static void closeAlltheApps(List<String> appExecPaths) {
+    public static void closeAllApps(List<String> appExecPaths) {
         try {
             ProcessBuilder builder = new ProcessBuilder("tasklist");
             Process process = builder.start();
@@ -293,6 +288,17 @@ public class DevAppStart {
                 String name = new File(execPath).getName().toLowerCase();
                 for (String taskLine : taskListLines) {
                     if (taskLine.contains(name)) {
+                        if(name.equals("powershell.exe")) {
+                            continue;
+                            // ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", "WindowsTerminal.exe");
+                            // killBuilder.start();
+                            // System.out.println("Killing: WindowsTerminal.exe");
+                        } 
+                        if(name.equals("git-bash.exe")) {
+                            ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", "mintty.exe");
+                            killBuilder.start();
+                            System.out.println("Killing: mintty.exe");
+                        }
                         System.out.println("Killing: " + name);
                         ProcessBuilder killBuilder = new ProcessBuilder("taskkill", "/f", "/im", name);
                         killBuilder.start();
