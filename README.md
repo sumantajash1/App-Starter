@@ -1,5 +1,7 @@
 # App-Starter
+Opens the selected apps automatically, and closes all of the listed applications at once.
 
+Context:-
 I do backend development using Spring Boot.
 
 Every time I open my PC and start to work on my project, I always need to open multiple applications like:
