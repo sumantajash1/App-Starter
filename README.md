@@ -1,6 +1,6 @@
 # App-Starter
 Opens the selected apps automatically, and closes all of the listed applications at once.
-<img src="AppStarterSS.png" alt="App Screenshot" width="400"/>
+<img src="AppStarterSS.png" alt="App Screenshot" width="200"/>
 
 Context:-
 I do backend development using Spring Boot.
